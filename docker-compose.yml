@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  config-service:
+    build: ./config-service
+    container_name: config-service-container
+    networks:
+      - microservice-network
+    ports:
+      - '9999:9999'
+    expose:
+      - '9999'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9999/actuator/health" ]
+      interval: 10s
+      retries: 4
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service-container
+    networks:
+      - microservice-network
+    ports:
+      - '8761:8761'
+    expose:
+      - '8761'
+    depends_on:
+      config-service:
+        condition: service_healthy
+
+networks:
+  microservice-network:
